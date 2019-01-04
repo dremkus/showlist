@@ -1,0 +1,52 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+	<div class="jumbotron">
+
+	{% with messages = get_flashed_messages() %}
+		{% if messages %}
+			<ul class="flashes">
+			{% for message in messages %}
+				<div class="message_flash">{{ message }}</div>
+			{% endfor %}
+			</ul>
+		{% endif %}
+	{% endwith %}
+
+	{% from "includes/_formhelpers.html" import render_field %}
+	<h1>Show</h1>
+	<form method="POST" >
+		<div class="form-group">
+			{{render_field(form.idshow,class_="form-control")}}
+		</div>
+		<div class="form-group">
+			{{render_field(form.idvenue,class_="form-control")}}
+		</div>
+		<div class="form-group">
+			{{render_field(form.show_date,class_="form-control")}}
+		</div>
+		<div class="form-group">
+			{{render_field(form.show_time,class_="form-control")}}
+		</div>
+		<div class="form-group">
+			{{render_field(form.show_flyer_pdf,class_="form-control")}}
+		</div>
+		<div class="form-group">
+			{{render_field(form.show_flyer_jpg,class_="form-control")}}
+		</div>
+		<div class="form-group">
+			{{render_field(form.show_info1,class_="form-control")}}
+		</div>
+		<div class="form-group">
+			{{render_field(form.show_info2,class_="form-control")}}
+		</div>
+		<div class="form-group">
+			{{render_field(form.show_info3,class_="form-control")}}
+		</div>
+		<div class="form-group">
+			{{render_field(form.fee,class_="form-control")}}
+		</div>
+		<p><input type="submit" value="Submit" class="btn btn-primary"></P>
+	</form>
+</div>
+{% endblock %}

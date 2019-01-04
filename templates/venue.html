@@ -1,0 +1,45 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+	<div class='jumbotron'>
+	{% with messages = get_flashed_messages() %}
+		{% if messages %}
+			<ul class="flashes">
+			{% for message in messages %}
+				<div class="message_flash">{{ message }}</div>
+			{% endfor %}
+			</ul>
+		{% endif %}
+	{% endwith %}
+
+
+	<h1>Venues</h1>
+		<tr>
+			<td>
+				<form method="GET" action="/venueadd"><input type="submit" value="Add Venue" class="btn"></form>
+			</td>
+		</tr>
+		<table class="list-group">
+		<tbody>
+		<tr>
+			<th width=8%>ID</th><th width=10%>Venue</th><th width=40%>Address</th><th width=20%>City</th><th width=10%>Zip</th><th width=20%>Phone</th><th width=20%>URL</th>
+		</tr>
+		{% for venue in venues %}
+		<tr>
+			<td class="table-row" width=8%>{{venue.IDVENUE}}</td>
+			<td class="table-row" width=10%>{{venue.VENUENAME}}</td>
+			<td class="table-row" width=40%>{{venue.VENUEADDRESS}}</td>
+			<td class="table-row" width=20%>{{venue.VENUECITY}} </td>
+			<td class="table-row" width=10%>{{venue.VENUEZIP}} </td>
+			<td class="table-row" width=20%>{{venue.VENUEPHONE}} </td>
+			<td class="table-row" width=10%>{{venue.VENUEURL}} </td>
+			<td>
+				<form method="GET" action="/venuevi/{{venue.IDVENUE}}" id={{venue.IDVENUE}}><input type="submit" value="Edit" class="btn"></form>
+				<form method="GET" action="/venuecp/{{venue.IDVENUE}}" id={{venue.IDVENUE}}><input type="submit" value="Copy" class="btn"></form>
+			</td>
+		</tr>
+		{% endfor %}
+		</table>
+		</tbody>
+	</div>
+{% endblock %}

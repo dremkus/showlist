@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+	<div class='jumbotron'>
+	{% with messages = get_flashed_messages() %}
+		{% if messages %}
+			<ul class="flashes">
+			{% for message in messages %}
+				<div class="message_flash">{{ message }}</div>
+			{% endfor %}
+			</ul>
+		{% endif %}
+	{% endwith %}
+
+
+	<h1>Shows</h1>
+		<tr>
+			<td>
+				<form method="GET" action="/showadd"><input type="submit" value="Add Show" class="btn"></form>
+			</td>
+		</tr>
+		<table class="list-group">
+		<tbody>
+		<tr>
+			<th width=15%>Date</th><th width=40%>Venue</th><th width=20%>City</th><th width=10%>Fee</th><th></th>
+		</tr>
+		{% for show in calendar %}
+		<tr>
+			<td class="table-row" width=15%>{{show.SHOWDATE}}</td>
+			<td class="table-row" width=40%>{{show.VENUENAME}}</td>
+			<td class="table-row" width=20%>{{show.VENUECITY}} </td>
+			<td class="table-row" width=10%>{{show.FEE}} </td>
+			<td>
+				<form method="GET" action="/showvi/{{show.IDSHOW}}" id={{show.IDSHOW}}><input type="submit" value="Edit" class="btn"></form>
+				<form method="GET" action="/showcp/{{show.IDSHOW}}" id={{show.IDSHOW}}><input type="submit" value="Copy" class="btn"></form>
+			</td>
+		</tr>
+		{% endfor %}
+		</table>
+		</tbody>
+	</div>
+{% endblock %}
