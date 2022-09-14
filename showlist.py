@@ -1,12 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
 import sys
 import os
 import MySQLdb
+import jinja2
 from flask_mysqldb import MySQL
 from htmltmpl import TemplateManager, TemplateProcessor
 from flask import Flask, render_template, flash, redirect, url_for, session,  request
-from wtforms import Form, StringField, TextAreaField, PasswordField, DateField, validators, IntegerField
+from wtforms import Form, StringField, TextAreaField, PasswordField, DateField, SelectField, validators, IntegerField
 from passlib.hash import sha256_crypt
 #from shows import Calendar
 
@@ -17,12 +18,19 @@ app.secret_key='Yes, its a secr3t'
 
 # Config MySQL
 app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = ''
-app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = '40ounce'
 app.config['MYSQL_DB'] = 'showdb'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 db = MySQL(app)
+
+def venue_list(database):
+	cur = db.connection.cursor()
+	sql = "select idvenue,venue_name from showdb.venue"
+	cur.execute(sql)
+	cur.close()
+	return cur.fetchall()
 
 class Show:
 	def __init__(self,db):
@@ -87,7 +95,9 @@ def venuelist():
 	return render_template('venue.html', venues = Venues)
 
 class ShowForm(Form):
-	idvenue=IntegerField('Venue ID',[validators.DataRequired()])
+#	idvenue=IntegerField('Venue ID',[validators.DataRequired()])
+#	idvenue=SelectField('Venue ID',choices=[(0,'<add new>'),(14,'Pub 1281'),(11,'Fraternal Order of Eagles Aerie #2634')])
+	idvenue=SelectField('Venue ID',choices=[],coerce=int)
 	idshow = IntegerField('Show ID')
 	show_date=DateField('Show Date', [validators.DataRequired()])
 	show_time = StringField('Show Time')
@@ -110,12 +120,28 @@ class VenueForm(Form):
 
 @app.route('/showadd', methods=['GET','POST'])
 def showadd():
+	# Create cursor
+	cur = db.connection.cursor()
+
 	form = ShowForm(request.form)
 	form.idshow.data = 0
 	form.show_time.data = '8pm'
 	form.show_flyer_pdf.data = 'shows_files/<YYYYMMDD>-<VenueName>.pdf'
-	form.show_flyer_jpg.data = 'images/PromoPhoto-20171028-1-bluetone.jpg'
+	form.show_flyer_jpg.data = 'images/BandPhoto_with_logo_20191010.jpg'
+	form.idvenue.choices = [(0,'<add new>')]
+	rows = cur.execute("select idvenue,venue_name,venue_city from showdb.venue")
+	venues = cur.fetchall()
+	idx = 0
+	while idx < rows:
+		idvenue = int(list(list(venues[idx].items())[0])[1])
+		venue_name = list(list(venues[idx].items())[2])[1].encode('ascii','ignore') + ' - ' + list(list(venues[idx].items())[1])[1].encode('ascii','ignore')
+		form.idvenue.choices += [(idvenue,venue_name)]
+		idx += 1
+
 	if request.method == 'POST' and form.validate():
+		if int(request.form['idvenue']) == 0:
+			return redirect('/venueadd')
+
 		sql = "INSERT INTO showdb.showlist(idvenue,show_date,show_time,show_flyer_pdf,show_flyer_jpg,show_info1,show_info2,show_info3,fee) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
 		val = (int(request.form['idvenue']),
 			request.form['show_date'].encode('ascii','ignore'),
@@ -127,8 +153,6 @@ def showadd():
 			request.form['show_info3'].encode('ascii','ignore'),
 			int(request.form['fee']))
 
-		# Create cursor
-		cur = db.connection.cursor()
 		cur.execute(sql,val)
 		cur.close()
 		flash('Show added')
@@ -157,6 +181,16 @@ def showvi(id):
 	form.show_info2.data = show.get('show_info2')
 	form.show_info3.data = show.get('show_info3')
 	form.fee.data = show.get('fee')
+	form.idvenue.choices = [(form.idvenue.data,'<no change>')]
+	rows = cur.execute("select idvenue,venue_name,venue_city from showdb.venue")
+	venues = cur.fetchall()
+	idx = 0
+	while idx < rows:
+		idvenue = int(list(list(venues[idx].items())[0])[1])
+		venue_name = list(list(venues[idx].items())[2])[1].encode('ascii','ignore') + ' - ' + list(list(venues[idx].items())[1])[1].encode('ascii','ignore')
+		form.idvenue.choices += [(idvenue,venue_name)]
+		idx += 1
+
 
 	render_template('showdata.html',form=form,id=id)
 
@@ -227,8 +261,10 @@ def showcp(id):
 
 @app.route('/venueadd', methods=['GET','POST'])
 def venueadd():
+	last_url = request.referrer
 	form = VenueForm(request.form)
 	form.idvenue.data = 0
+	flash(last_url)
 	if request.method == 'POST' and form.validate():
 		sql = "INSERT INTO showdb.venue(venue_name,venue_address,venue_city,venue_zip,venue_phone,venue_url) VALUES(%s,%s,%s,%s,%s,%s)"
 		val = (request.form['venue_name'].encode('ascii','ignore'),
@@ -245,7 +281,7 @@ def venueadd():
 		flash('Venue added')
 		db.connection.commit()
 
-		return redirect('/venue')
+		return redirect(last_url)
 	
 	return render_template('venuedata.html',form=form)
 
@@ -321,6 +357,87 @@ def venuecp(id):
 		return redirect('/venue')
 	
 	return render_template('venuedata.html',form=form,id=id)
+	
+@app.route('/pageupdate', methods=['GET','POST'])
+def pageupdate():
+	last_url = request.referrer
+
+	#
+	#  Create a cursor to hold the query results
+	#
+	cur = db.connection.cursor()
+	query = "SELECT dy, show_flyer_pdf, show_flyer_jpg, show_dt, venue_name, venue_address, venue_city, venue_zip, venue_phone, venue_url, show_time, show_info1, show_info2, show_info3 FROM show_v WHERE show_date >= curdate() order by show_date asc"
+
+	#
+	#  Execute the query
+	#
+	cur.execute(query)
+	#
+	#  Create an empty array to hold the calendar entries
+	#
+	Calendar = []
+	#
+	#  Parse the rows into a hash and load each hash into the calendar array
+	#
+	shows = cur.fetchall()
+	#for (dy, show_flyer_pdf, show_flyer_jpg, show_dt, venue_name, venue_address, venue_city, venue_zip, venue_phone, venue_url, show_time, show_info1, show_info2, show_info3 ) in shows:
+	for thisshow in shows:
+		#
+		#  If this is the first row, capture the next flyer
+		#
+		try:
+			flyer
+		except NameError:
+			flyer = thisshow['show_flyer_jpg']
+
+		#
+		#  Create a new hash for each calendar entry
+		#
+		show = {}
+		show["SHOWDAY"] = thisshow['dy']
+		show["SHOWPDF"] = thisshow['show_flyer_pdf']
+		show["SHOWJPG"] = thisshow['show_flyer_jpg']
+		show["SHOWDATE"] = thisshow['show_dt']
+		show["VENUENAME"] = thisshow['venue_name']
+		show["VENUEADDR"] = thisshow['venue_address']
+		show["VENUECITY"] = thisshow['venue_city']
+		show["VENUEZIP"] = thisshow['venue_zip']
+		show["VENUEPHONE"] = thisshow['venue_phone']
+		show["VENUEURL"] = thisshow['venue_url']
+		show["STARTTIME"] = thisshow['show_time']
+		show["SHOW_INFO1"] = thisshow['show_info1']
+		show["SHOW_INFO2"] = thisshow['show_info3']
+		show["SHOW_INFO3"] = thisshow['show_info2']
+
+		#
+		#  Add the hash to the array
+		#
+		Calendar.append(show)
+
+	#  template directory and file for Jinja2 processing
+	templateDir = "/var/www/showlist/templates"
+	TEMPLATE_FILE="shows.html"
+
+	#
+	#  Process the Jinja2 template
+	templateLoader = jinja2.FileSystemLoader(searchpath=templateDir)
+	templateEnv = jinja2.Environment(loader=templateLoader)
+	template = templateEnv.get_template(TEMPLATE_FILE)
+
+	outText = template.render(flyer=flyer,show="",calendar=Calendar)
+
+	#print(outText)
+	outfile = '/var/www/test.smokin45s.com'  + "/shows.html"
+	#
+	#  Write the output
+	#
+	f = open(outfile,'w')
+	f.write(outText)
+	f.close()
+
+	flash('Page updated')
+	return redirect(last_url)
+
 
 if __name__ == '__main__':
     app.run() 
