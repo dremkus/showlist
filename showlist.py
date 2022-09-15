@@ -5,7 +5,7 @@ import os
 import MySQLdb
 import jinja2
 from flask_mysqldb import MySQL
-from htmltmpl import TemplateManager, TemplateProcessor
+#from htmltmpl import TemplateManager, TemplateProcessor
 from flask import Flask, render_template, flash, redirect, url_for, session,  request
 from wtforms import Form, StringField, TextAreaField, PasswordField, DateField, SelectField, validators, IntegerField
 from passlib.hash import sha256_crypt
@@ -17,10 +17,10 @@ app.debug = True
 app.secret_key='Yes, its a secr3t'
 
 # Config MySQL
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '40ounce'
-app.config['MYSQL_DB'] = 'showdb'
+app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST')
+app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
+app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
+app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 db = MySQL(app)
@@ -148,7 +148,7 @@ def showadd():
 			request.form['show_time'].encode('ascii','ignore'),
 			request.form['show_flyer_pdf'].encode('ascii','ignore'),
 			request.form['show_flyer_jpg'].encode('ascii','ignore'),
-			request.form['show_info1'].encode('ascii','ignore'), 
+			request.form['show_info1'].encode('ascii','ignore'),
 			request.form['show_info2'].encode('ascii','ignore'),
 			request.form['show_info3'].encode('ascii','ignore'),
 			int(request.form['fee']))
@@ -159,7 +159,7 @@ def showadd():
 		db.connection.commit()
 
 		return redirect('/')
-	
+
 	return render_template('showdata.html',form=form)
 
 @app.route('/showvi/<id>', methods=['GET','POST'])
@@ -201,7 +201,7 @@ def showvi(id):
 			request.form['show_time'].encode('ascii','ignore'),
 			request.form['show_flyer_pdf'].encode('ascii','ignore'),
 			request.form['show_flyer_jpg'].encode('ascii','ignore'),
-			request.form['show_info1'].encode('ascii','ignore'), 
+			request.form['show_info1'].encode('ascii','ignore'),
 			request.form['show_info2'].encode('ascii','ignore'),
 			request.form['show_info3'].encode('ascii','ignore'),
 			int(request.form['fee']),
@@ -212,7 +212,7 @@ def showvi(id):
 		flash('Show updated')
 		db.connection.commit()
 		return redirect('/')
-	
+
 	return render_template('showdata.html',form=form,id=id)
 
 @app.route('/showcp/<id>', methods=['GET','POST'])
@@ -244,7 +244,7 @@ def showcp(id):
 			request.form['show_time'].encode('ascii','ignore'),
 			request.form['show_flyer_pdf'].encode('ascii','ignore'),
 			request.form['show_flyer_jpg'].encode('ascii','ignore'),
-			request.form['show_info1'].encode('ascii','ignore'), 
+			request.form['show_info1'].encode('ascii','ignore'),
 			request.form['show_info2'].encode('ascii','ignore'),
 			request.form['show_info3'].encode('ascii','ignore'),
 			int(request.form['fee']))
@@ -256,7 +256,7 @@ def showcp(id):
 		flash('Show copied')
 		db.connection.commit()
 		return redirect('/')
-	
+
 	return render_template('showdata.html',form=form,id=id)
 
 @app.route('/venueadd', methods=['GET','POST'])
@@ -282,7 +282,7 @@ def venueadd():
 		db.connection.commit()
 
 		return redirect(last_url)
-	
+
 	return render_template('venuedata.html',form=form)
 
 @app.route('/venuevi/<id>', methods=['GET','POST'])
@@ -319,7 +319,7 @@ def venuevi(id):
 		flash('Venue updated')
 		db.connection.commit()
 		return redirect('/venue')
-	
+
 	return render_template('venuedata.html',form=form,id=id)
 
 @app.route('/venuecp/<id>', methods=['GET','POST'])
@@ -355,9 +355,9 @@ def venuecp(id):
 		flash('Venue Copied')
 		db.connection.commit()
 		return redirect('/venue')
-	
+
 	return render_template('venuedata.html',form=form,id=id)
-	
+
 @app.route('/pageupdate', methods=['GET','POST'])
 def pageupdate():
 	last_url = request.referrer
@@ -440,4 +440,4 @@ def pageupdate():
 
 
 if __name__ == '__main__':
-    app.run() 
+    app.run()
