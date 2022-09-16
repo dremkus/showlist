@@ -201,12 +201,16 @@ def showvi(id):
 	form.idvenue.choices = [(form.idvenue.data,'<no change>')]
 	rows = cur.execute("select idvenue,venue_name,venue_city from showdb.venue")
 	venues = cur.fetchall()
-	idx = 0
-	while idx < rows:
-		idvenue = int(list(list(venues[idx].items())[0])[1])
-		venue_name = list(list(venues[idx].items())[2])[1].encode('ascii','ignore') + ' - ' + list(list(venues[idx].items())[1])[1].encode('ascii','ignore')
-		form.idvenue.choices += [(idvenue,venue_name)]
-		idx += 1
+	# idx = 0
+	# while idx < rows:
+	# 	idvenue = int(list(list(venues[idx].items())[0])[1])
+	# 	venue_name = list(list(venues[idx].items())[2])[1].encode('ascii','ignore') + ' - ' + list(list(venues[idx].items())[1])[1].encode('ascii','ignore')
+	# 	form.idvenue.choices += [(idvenue,venue_name)]
+	# 	idx += 1
+	for venue in venues:
+		choice=(venue['idvenue'],f"{venue['venue_name']} - {venue['venue_city']}")
+		logging.info(f"choice: {choice}")
+		form.idvenue.choices += [choice]
 
 
 	render_template('showdata.html',form=form,id=id)
