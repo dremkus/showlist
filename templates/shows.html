@@ -1,0 +1,63 @@
+{% extends "show_layout.html" %}
+{% block content %}
+{% for show in calendar %}
+ 
+				<tr>
+					<td width="5%">
+						<blockquote class="date_text">
+						{% if show.VENUEADDR %}
+						<a href="{{ show.SHOWPDF }}">
+						{% endif %}
+		  				 {{ show.SHOWDAY }},  {{ show.SHOWDATE }}
+						{% if show.VENUEADDR %}
+		  				</a>
+						{% endif %}
+		  				</blockquote>
+					</td>
+					<td width="95%">
+						<blockquote class="show_list">
+						<b><font color="#ffffff" face="Verdana"><strong><u> {{ show.VENUENAME }} </u></strong></font></b>
+						{% if show.VENUEADDR %}
+						<br> {{ show.VENUEADDR }}
+						{% endif %}
+						<br> {{ show.VENUECITY }}  
+						{% if  show.VENUEZIP %}
+						 {{ show.VENUEZIP }}
+						{% endif %}
+						{% if show.VENUEPHONE %}
+						<br> {{ show.VENUEPHONE }}
+						{% endif %}
+						{% if show.SHOW_INFO1 %}
+						<br>
+						<br> {{ show.SHOW_INFO1 }}
+						{% endif %}
+						{% if show.SHOW_INFO2 %}
+						<br> {{ show.SHOW_INFO2 }}
+						{% endif %}
+						{% if show.SHOW_INFO3 %}
+						<br> {{ show.SHOW_INFO3 }}
+						{% endif %}
+	 					<br> {{ show.STARTTIME }} start time<br>
+						{% if show.VENUEURL %}
+						<a href= {{ show.VENUEURL }}  target="new"> {{ show.VENUEURL }}</a>
+						{% endif %}
+			
+						</blockquote>
+					</td>
+				</tr>
+{% endfor %}
+	
+    	</tbody>
+    </table>
+ 
+<!---                            END UPCOMING SHOWS                            --->
+<!---   CURRENT FLYER                                --->
+		{% if flyer %}
+  		<img src="{{ flyer }}" width="80%" align="middle">
+  		{% else %}
+		<img src="images/BandPhoto_with_logo_10-2017-3.jpg" width=80% align="middle">
+		{% endif %}
+<!---                            END CURRENT FLYER                             --->
+
+{% endblock %}
+

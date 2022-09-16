@@ -9,6 +9,14 @@ from flask_mysqldb import MySQL
 from flask import Flask, render_template, flash, redirect, url_for, session,  request
 from wtforms import Form, StringField, TextAreaField, PasswordField, DateField, SelectField, validators, IntegerField
 from passlib.hash import sha256_crypt
+
+import logging
+
+logging.basicConfig(
+	format=f"%(asctime)s %(levelname)-8s %(message)s",
+	level=logging.INFO,
+	datefmt='%Y-%m-%d %H:%M:%S'
+)
 #from shows import Calendar
 
 
@@ -131,12 +139,21 @@ def showadd():
 	form.idvenue.choices = [(0,'<add new>')]
 	rows = cur.execute("select idvenue,venue_name,venue_city from showdb.venue")
 	venues = cur.fetchall()
-	idx = 0
-	while idx < rows:
-		idvenue = int(list(list(venues[idx].items())[0])[1])
-		venue_name = list(list(venues[idx].items())[2])[1].encode('ascii','ignore') + ' - ' + list(list(venues[idx].items())[1])[1].encode('ascii','ignore')
-		form.idvenue.choices += [(idvenue,venue_name)]
-		idx += 1
+	logging.info(f"{venues}")
+	logging.info(f"{type(venues)}")
+	# idx = 0
+	# while idx < rows:
+	# 	idvenue = int(list(list(venues[idx].items())[0])[1])
+	# 	logging.info(f"{idx} - {venues[idx].items()}")
+	# 	logging.info(f"{idx} - {venues[idx].items()['venue_name']} - {venues[idx].items()['venue_city']}")
+	# 	venue_name = list(list(venues[idx].items())[2])[1].encode('ascii','ignore') + ' - ' + list(list(venues[idx].items())[1])[1].encode('ascii','ignore')
+	# 	form.idvenue.choices += [(idvenue,venue_name)]
+	# 	idx += 1
+
+	for venue in venues:
+		choice=(venue['idvenue'],f"{venue['venue_name']} - {venue['venue_city']}")
+		logging.info(f"choice: {choice}")
+		form.idvenue.choices += [choice]
 
 	if request.method == 'POST' and form.validate():
 		if int(request.form['idvenue']) == 0:
@@ -415,9 +432,12 @@ def pageupdate():
 		Calendar.append(show)
 
 	#  template directory and file for Jinja2 processing
-	templateDir = "/var/www/showlist/templates"
+	#templateDir = "/var/www/showlist/templates"
+	templateDir = os.getenv('TEMPLATE_DIR')
 	TEMPLATE_FILE="shows.html"
 
+	logging.info(f"template: {templateDir}/{TEMPLATE_FILE}")
+	logging.info(f"{type(templateDir)}")
 	#
 	#  Process the Jinja2 template
 	templateLoader = jinja2.FileSystemLoader(searchpath=templateDir)
@@ -427,7 +447,8 @@ def pageupdate():
 	outText = template.render(flyer=flyer,show="",calendar=Calendar)
 
 	#print(outText)
-	outfile = '/var/www/test.smokin45s.com'  + "/shows.html"
+	htmlDir=os.getenv('HTML_DIR')
+	outfile = f"{htmlDir}/shows.html"
 	#
 	#  Write the output
 	#
