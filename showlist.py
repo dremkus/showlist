@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python
 
 import sys
 import os
@@ -44,7 +44,7 @@ class Show:
 	def __init__(self,db):
 		self.session = db.connection
 
-	def list():
+	def list(self):
 		cur = self.session.cursor()
 		sql = 'SELECT s.idshow,s.show_date,v.venue_name,v.venue_city,s.fee FROM showdb.showlist s join showdb.venue v on s.idvenue = v.idvenue order by s.show_date desc'
 		cur.execute(sql)
