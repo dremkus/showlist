@@ -1,14 +1,14 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import sys
 import os
-import MySQLdb
+#import MySQLdb
 import jinja2
 from flask_mysqldb import MySQL
 #from htmltmpl import TemplateManager, TemplateProcessor
 from flask import Flask, render_template, flash, redirect, url_for, session,  request
 from wtforms import Form, StringField, TextAreaField, PasswordField, DateField, SelectField, validators, IntegerField
-from passlib.hash import sha256_crypt
+#from passlib.hash import sha256_crypt
 
 import logging
 
