@@ -1,0 +1,5 @@
+jinja2
+mysqlclientß
+flask_mysqldb
+flask
+wtforms

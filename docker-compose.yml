@@ -1,0 +1,18 @@
+version: '3'
+services:
+  web:
+    build: .
+    command: gunicorn -b 0.0.0.0:8700 showlist:app
+    depends_on:
+      - mariadb
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "8700:8700"
+    environment:
+      DATABASE_URL: mariadb://root@mariadb/showdb
+  mariadb:
+    image: mariadb:latest
+    environment:
+
+      MARIADB_ROOT_PASSWORD: 40ounce
