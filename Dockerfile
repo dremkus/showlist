@@ -8,8 +8,9 @@ RUN apk update \
     alpine-sdk
 RUN find /usr/include
 RUN mkdir /usr/src/app
+COPY . /usr/src/app
 WORKDIR /usr/src/app
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 ENV PYTHONUNBUFFERED 1
-COPY . .
+CMD [ "gunicorn", "--thread=1", "--timeout=240", "--bind=0.0.0.0:8700", "showlist:app"]

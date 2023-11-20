@@ -1,8 +1,31 @@
-version: '3'
+version: "3.5"
 services:
-  web:
-    build: .
-    command: gunicorn -b 0.0.0.0:8700 showlist:app
+  mariadb:
+    image: mariadb:latest
+    container_name: showdb
+    ports:
+      - 3308:3306
+    environment:
+      MARIADB_ROOT_HOST: "%"
+      MARIADB_ROOT_PASSWORD: 40ounce
+    volumes:
+      - 63dc31d6b2d092fcac4d6e405096f8de05e34134210db235af1b2256a14d202b:/var/lib/mysql
+      
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpadmin
+    links:
+      - mariadb
+    ports:
+      - 8080:80
+    environment:
+      PMA_HOST: mariadb
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+
+  showlist:
+    build: 
+        context: https://github.com/dremkus/showlist.git
     depends_on:
       - mariadb
     volumes:
@@ -11,8 +34,6 @@ services:
       - "8700:8700"
     environment:
       DATABASE_URL: mariadb://root@mariadb/showdb
-  mariadb:
-    image: mariadb:latest
-    environment:
 
-      MARIADB_ROOT_PASSWORD: 40ounce
+volumes:
+    63dc31d6b2d092fcac4d6e405096f8de05e34134210db235af1b2256a14d202b: 

@@ -43,6 +43,7 @@ def venue_list(database):
 class Show:
 	def __init__(self,db):
 		self.session = db.connection
+		logging.info(f"Initialized Show class")
 
 	def list(self):
 		cur = self.session.cursor()
@@ -57,8 +58,14 @@ def showlist():
 	# Create cursor
 	cur = db.connection.cursor()
 	sql = 'SELECT s.idshow,s.show_date,v.venue_name,v.venue_city,s.fee FROM showdb.showlist s join showdb.venue v on s.idvenue = v.idvenue order by s.show_date desc'
-	cur.execute(sql)
-	shows = cur.fetchall()
+	try:
+		cur.execute(sql)
+	except Exception as e:
+		logging.error(f"Error executing SQL statement {sql}:{e}")
+	try:
+		shows = cur.fetchall()
+	except Exception as e:
+		logging.error(f"Error fetching rows: {e}")
 	Calendar = []
 
 	for show in shows:
