@@ -465,6 +465,8 @@ def pageupdate():
 
 	outText = template.render(flyer=flyer,show="",calendar=Calendar)
 
+	logging.info(f"calendar: {Calendar}")
+
 	#print(outText)
 	htmlDir=os.getenv('HTML_DIR')
 	outfile = f"{htmlDir}/shows.html"
