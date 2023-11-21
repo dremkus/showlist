@@ -1,4 +1,7 @@
 jinja2
+# mysqlclient==1.3.14
+# flask_mysqldb==1.0.1
+# flask==2.3.3
 mysqlclient
 flask_mysqldb
 flask

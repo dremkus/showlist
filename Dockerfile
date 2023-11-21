@@ -1,11 +1,12 @@
-FROM python:3.10.0-alpine
-RUN apk update \
-  && apk add \
-    mariadb-dev \
-    gcc \
-    python3-dev \ 
-    mysql-client \
-    alpine-sdk
+FROM python:3.10-slim-bullseye
+
+RUN apt update 
+RUN apt install -y gcc 
+RUN apt install -y python3-dev wget
+RUN wget https://dlm.mariadb.com/2678574/Connectors/c/connector-c-3.3.3/mariadb-connector-c-3.3.3-debian-bullseye-amd64.tar.gz -O - | tar -zxf - --strip-components=1 -C /usr
+RUN apt install -y libmariadb-dev
+RUN apt install -y libmariadb-dev-compat default-libmysqlclient-dev build-essential pkg-config
+RUN apt list
 RUN find /usr/include
 RUN mkdir /usr/src/app
 COPY . /usr/src/app

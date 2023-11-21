@@ -29,8 +29,10 @@ app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST')
 app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
 app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
 app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')
+app.config['MYSQL_PORT'] = int(os.getenv('MYSQL_PORT'))
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
+logging.info(f"Database config: {app.config}")
 db = MySQL(app)
 
 def venue_list(database):
@@ -57,6 +59,11 @@ class Show:
 def showlist():
 	# Create cursor
 	cur = db.connection.cursor()
+	try:
+		logging.info(f"{cur.execute('show schemas')}")
+	except Exception as e:
+		logging.error(f"Error executing SQL statement {e}")
+
 	sql = 'SELECT s.idshow,s.show_date,v.venue_name,v.venue_city,s.fee FROM showdb.showlist s join showdb.venue v on s.idvenue = v.idvenue order by s.show_date desc'
 	try:
 		cur.execute(sql)
@@ -65,6 +72,7 @@ def showlist():
 	try:
 		shows = cur.fetchall()
 	except Exception as e:
+		shows=[]
 		logging.error(f"Error fetching rows: {e}")
 	Calendar = []
 
