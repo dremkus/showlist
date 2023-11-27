@@ -36,8 +36,8 @@ services:
 
   showlist:
     container_name: showlist
-    build: 
-        context: .
+    build:
+      context: .
     depends_on:
       - mariadb
     volumes:
