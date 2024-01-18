@@ -1,0 +1,62 @@
+version: "3.5"
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: showdb
+    ports:
+      - 3308:3306
+    environment:
+      MARIADB_ROOT_HOST: "%"
+      MARIADB_ROOT_PASSWORD: 40ounce
+    volumes:
+      - 63dc31d6b2d092fcac4d6e405096f8de05e34134210db235af1b2256a14d202b:/var/lib/mysql
+      
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpadmin
+    links:
+      - mariadb
+    ports:
+      - 8080:80
+    environment:
+      PMA_HOST: mariadb
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+
+  test.smokin45s.com:
+    image: httpd
+    container_name: apache
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      HTTPD_PREFIX: /usr/local/apache2
+    volumes:
+      -   test.smokin45s.com:/usr/local/apache2/htdocs
+
+  showlist:
+    image: showlist:latest
+    container_name: showlist
+    depends_on:
+      - mariadb
+    volumes:
+      - .:/usr/src/app
+      - test.smokin45s.com:/usr/local/apache2/htdocs
+    links:
+      - mariadb
+      - test.smokin45s.com
+    ports:
+      - "8700:8700"
+    environment:
+      DATABASE_URL: mariadb://root@mariadb/showdb
+      MYSQL_HOST: mariadb
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 40ounce
+      MYSQL_DB: showdb
+      MYSQL_PORT: 3306
+      TEMPLATE_DIR: templates 
+      HTML_DIR: /usr/local/apache2/htdocs    
+
+volumes:
+    63dc31d6b2d092fcac4d6e405096f8de05e34134210db235af1b2256a14d202b:
+    test.smokin45s.com:
