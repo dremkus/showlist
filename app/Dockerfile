@@ -9,10 +9,10 @@ RUN apt install -y libmariadb-dev-compat default-libmysqlclient-dev build-essent
 RUN apt list
 RUN find /usr/include
 RUN mkdir /usr/src/app
-COPY app /usr/src/app
+#COPY app /usr/src/app
 WORKDIR /usr/src/app
-COPY app/requirements.txt .
+COPY requirements.txt .
 RUN pip install -r requirements.txt
 ENV PYTHONUNBUFFERED 1
-RUN cd /usr/src/app
+RUN find .
 CMD [ "gunicorn", "--thread=1", "--timeout=240", "--bind=0.0.0.0:8700", "showlist:app"]
